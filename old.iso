@@ -1,0 +1,67 @@
+#include <SPI.h>
+
+#define serial_in 6
+#define baud_rate 115200
+
+
+int hmuch = 6;
+bool pressed=false;
+char pressedKey='0';
+bool was=false;
+volatile int arr[90];
+String packet="",current_time="";
+
+void setup(){
+  Serial.begin(baud_rate);
+  
+  pinMode(serial_in, INPUT);
+}
+void loop() {
+    
+  for(int k=0;k<hmuch*15;k++)
+    arr[k]=0;
+  delayMicroseconds(416);
+  for(int lx=0;lx<hmuch*15;lx++){
+    arr[lx]=digitalRead(serial_in);   
+    delayMicroseconds(810);
+  }
+  packet="";current_time="";
+  for(int k=0;k<hmuch*15;k++){
+    if(arr[k]==0)
+      packet+="1";
+    else
+      packet+="0";
+  }
+  for(int k=0;k<=hmuch;k++)
+      getbytes(packet.substring(k*10+1,(k+1)*10-1));
+  Serial.println(current_time+pressedKey);
+  long test=millis();
+  while(digitalRead(serial_in)==0){
+    if(millis()-test>90)
+    {
+      Serial.println("-:--.--");
+      delayMicroseconds(16383);
+      delayMicroseconds(16383);
+      delayMicroseconds(16383);
+      delayMicroseconds(16383);
+      delayMicroseconds(16383);
+      delayMicroseconds(12042);
+    }
+  } 
+}
+
+void getbytes(String strbyte){
+  int digit=0;
+  for(int k=0;k<8;k++){
+  if(strbyte[k]=='1')
+    digit+=twopwr(k); 
+  }
+  char c=digit;
+  current_time+=String(c);
+}
+int twopwr(int a){
+  int out=1;
+  for(int l=0;l<a;l++)
+    out=out*2;
+  return out;
+}
